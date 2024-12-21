@@ -1,0 +1,10 @@
+import console;
+import time;
+
+fn main : args {
+    var start_time = time.now();
+    console.log("Hello, World");
+    var time_taken = time.now() - start_time();
+    console.write("program took " + time_taken + "ms");
+    ret 0;
+}
