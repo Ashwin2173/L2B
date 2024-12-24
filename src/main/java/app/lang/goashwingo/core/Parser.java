@@ -42,12 +42,23 @@ public class Parser {
             } else if(token.getType() == TokenType.KW_RETURN) {
                 this.checkGlobalScope("return statement");
                 statements.add(this.parseReturnStatement());
+            } else if(token.getType() == TokenType.KW_WHILE) {
+                this.checkGlobalScope("while statement");
+                statements.add(this.parseWhileStatement());
+            } else if(token.getType() == TokenType.KW_CALL) {
+                this.checkGlobalScope("system call statement");
+                statements.add(this.parseCallStatement());
             } else if(token.getType() == TokenType.CLOSE_BRACE) {
                 this.trace.pop();
                 return statements;
             } else {
-                statements.add(this.parseExpression());
-                this.consumeToken(TokenType.SEMICOLON);
+                Token nextToken = this.peek(1);
+                if(token.getType() == TokenType.ID && (nextToken != null && nextToken.getType() == TokenType.EQUAL)) {
+                    statements.add(this.parseAssignmentStatement());
+                } else {
+                    statements.add(this.parseExpression());
+                    this.consumeToken(TokenType.SEMICOLON);
+                }
             }
         }
         return statements;
@@ -61,11 +72,46 @@ public class Parser {
         this.addImport(moduleNameToken);
     }
 
+    private AssignmentStatement parseAssignmentStatement() {
+        Token name = this.peek();
+        int line = name.getLine();
+        this.consumeToken(TokenType.ID);
+        this.consumeToken(TokenType.EQUAL);
+        ExpressionStatement expressionStatement = new ExpressionStatement(this.equality());
+        this.consumeToken(TokenType.SEMICOLON);
+        return new AssignmentStatement(name, expressionStatement);
+    }
+
+    private WhileStatement parseWhileStatement() {
+        Token whileToken = this.peek();
+        this.trace.push(whileToken);
+        int line = whileToken.getLine();
+
+        WhileStatement whileStatement = new WhileStatement(line);
+        this.consumeToken(TokenType.KW_WHILE);
+        this.consumeToken(TokenType.OPEN_PARAM);
+        ExpressionStatement expressionStatement = this.parseExpression();
+        whileStatement.setExpressionStatement(expressionStatement);
+        this.consumeToken(TokenType.CLOSE_PARAM);
+        BlockStatement body = this.parseBlockStatement();
+        whileStatement.setBody(body);
+        this.consumeToken(TokenType.SEMICOLON);
+        return whileStatement;
+    }
+
     private ReturnStatement parseReturnStatement() {
         this.consumeToken(TokenType.KW_RETURN);
         ExpressionStatement expressionStatement = this.parseExpression();
         this.consumeToken(TokenType.SEMICOLON);
         return new ReturnStatement(expressionStatement);
+    }
+
+    private CallStatement parseCallStatement() {
+        int line = this.peek().getLine();
+        this.consumeToken(TokenType.KW_CALL);
+        List<ExpressionStatement> params = this.parseExpressionList();
+        this.consumeToken(TokenType.SEMICOLON);
+        return new CallStatement(params, line);
     }
 
     private FunctionDeclaration parseFunctionDeclaration() {
@@ -117,7 +163,8 @@ public class Parser {
     private List<Identifier> parseMembers() {
         List<Identifier> membersList = new ArrayList<>();
         do {
-            Identifier identifier = new Identifier(this.peek().getRaw());
+            Token token = this.peek();
+            Identifier identifier = new Identifier(token.getRaw(), token.getLine());
             membersList.add(identifier);
             this.consumeToken(TokenType.ID);
         } while(this.matchConsume(TokenType.DOT));
@@ -210,6 +257,14 @@ public class Parser {
             int value = Integer.parseInt(token.getRaw());
             return new IntLiteral(value);
         }
+        if(token.getType() == TokenType.KW_TRUE) {
+            this.nextToken();
+            return new BooleanLiteral(true);
+        }
+        if(token.getType() == TokenType.KW_FALSE) {
+            this.nextToken();
+            return new BooleanLiteral(false);
+        }
         if(token.getType() == TokenType.ID) {
             Token nextToken = this.peek(1);
             if(nextToken != null) {
@@ -220,7 +275,7 @@ public class Parser {
                 }
             }
             this.nextToken();
-            return new Identifier(token.getRaw());
+            return new Identifier(token.getRaw(), token.getLine());
         }
         if(token.getType() == TokenType.STRING_LITERAL) {
             this.nextToken();
@@ -278,10 +333,6 @@ public class Parser {
     }
 
     private Token nextToken() {
-        return this.nextToken(0);
-    }
-
-    private Token nextToken(int offset) {
         this.index++;
         return this.peek();
     }

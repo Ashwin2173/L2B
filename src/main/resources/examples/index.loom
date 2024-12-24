@@ -1,10 +1,11 @@
-import console;
-import time;
-
 fn main : args {
-    var start_time = time.now();
-    console.log("Hello, World");
-    var time_taken = time.now() - start_time();
-    console.write("program took " + time_taken + "ms");
-    ret 0;
+    call 10;
+    var start_time = laret;
+    var count = 0;
+    while(count < 1000000) {
+        count = count + 1;
+    };
+    call 10;
+    call 1, laret - start_time;
+    call 1, "ms";
 }

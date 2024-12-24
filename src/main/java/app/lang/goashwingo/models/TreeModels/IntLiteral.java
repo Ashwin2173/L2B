@@ -1,15 +1,16 @@
 package app.lang.goashwingo.models.TreeModels;
 
+import app.lang.goashwingo.core.ExpressionType;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class IntLiteral extends Expression {
-    int value;
+    long value;
 
-    public IntLiteral(int value) {
-        super.type = this.getClass().getName();
+    public IntLiteral(long value) {
+        super.type = ExpressionType.INT_LITERAL;
         this.value = value;
     }
 }

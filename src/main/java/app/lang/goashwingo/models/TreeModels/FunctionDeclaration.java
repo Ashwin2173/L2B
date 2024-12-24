@@ -1,5 +1,6 @@
 package app.lang.goashwingo.models.TreeModels;
 
+import app.lang.goashwingo.core.StatementType;
 import app.lang.goashwingo.exceptions.LoomSyntaxError;
 import app.lang.goashwingo.models.Token;
 import lombok.Getter;
@@ -16,7 +17,7 @@ public class FunctionDeclaration extends Statement {
     BlockStatement body;
 
     public FunctionDeclaration(Token name) {
-        super.type = this.getClass().getName();
+        super.type = StatementType.FUNCTION;
         this.name = name;
     }
 

@@ -32,5 +32,9 @@ public enum TokenType {
     KW_FUNCTION,
     KW_RETURN,
     KW_IMPORT,
-    KW_VAR
+    KW_VAR,
+    KW_CALL,
+    KW_WHILE,
+    KW_TRUE,
+    KW_FALSE
 }

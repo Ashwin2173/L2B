@@ -6,11 +6,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class StringLiteral extends Expression {
-    String value;
+public class BooleanLiteral extends Expression {
+    boolean value;
 
-    public StringLiteral(String value) {
-        super.type = ExpressionType.STRING_LITERAL;
+    public BooleanLiteral(boolean value) {
+        super.type = ExpressionType.BOOLEAN_LITERAL;
         this.value = value;
     }
 }

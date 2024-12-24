@@ -1,5 +1,6 @@
 package app.lang.goashwingo.models.TreeModels;
 
+import app.lang.goashwingo.core.StatementType;
 import app.lang.goashwingo.models.Token;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,7 @@ public class VariableDeclaration extends Statement {
     ExpressionStatement init;
 
     public VariableDeclaration(Token variableName, ExpressionStatement init) {
-        super.type = this.getClass().getName();
+        super.type = StatementType.VAR_DECLARATION;
         this.variable = variableName;
         this.init = init;
     }

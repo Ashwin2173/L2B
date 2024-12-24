@@ -49,6 +49,9 @@ public class Lexer {
         if(ch == ':') {
             return this.make(":", TokenType.COLON);
         }
+        if(ch == '!') {
+            return this.make("!", TokenType.NOT);
+        }
         if(ch == ',') {
             return this.make(",", TokenType.COMMA);
         }
@@ -68,7 +71,18 @@ public class Lexer {
             return this.make(")", TokenType.CLOSE_PARAM);
         }
         if(ch == '=') {
+            if(this.peekNext() == '=') {
+                this.getChar();
+                return this.make("==", TokenType.DOUBLE_EQUALS);
+            }
             return this.make("=", TokenType.EQUAL);
+        }
+        if(ch == '<') {
+            if(this.peekNext() == '=') {
+                this.getChar();
+                return this.make("<=", TokenType.LESSER_EQUALS);
+            }
+            return this.make("<", TokenType.LESSER);
         }
         if(ch == '+') {
             return this.make("+", TokenType.PLUS);
@@ -177,6 +191,10 @@ public class Lexer {
             put("fn", TokenType.KW_FUNCTION);
             put("var", TokenType.KW_VAR);
             put("ret", TokenType.KW_RETURN);
+            put("call", TokenType.KW_CALL);
+            put("true", TokenType.KW_TRUE);
+            put("false", TokenType.KW_FALSE);
+            put("while", TokenType.KW_WHILE);
         }};
         return keywordsMap.getOrDefault(word, null);
     }

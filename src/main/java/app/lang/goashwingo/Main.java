@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import app.lang.goashwingo.core.Lexer;
 import app.lang.goashwingo.core.Parser;
+import app.lang.goashwingo.core.interpreter.Orchestrator;
 import app.lang.goashwingo.exceptions.InternalError;
 import app.lang.goashwingo.exceptions.LoomSyntaxError;
 import app.lang.goashwingo.exceptions.UnImplementedBlockError;
@@ -40,7 +41,9 @@ public class Main {
         // printTokens(tokens);
 
         Program loomProgram = parseProgram(tokens);
-        System.out.println("response: " + loomProgram);
+        // System.out.println("response: " + loomProgram);
+
+        runProgram(loomProgram);
     }
 
     private static void printTokens(ArrayList<Token> tokens) {
@@ -56,6 +59,11 @@ public class Main {
     private static ArrayList<Token> tokenizeProgram(String program, String programPath) {
         Lexer lexer = new Lexer(program, programPath);
         return lexer.tokenize();
+    }
+
+    private static void runProgram(Program program) {
+        Orchestrator orchestrator = new Orchestrator(program);
+        orchestrator.start();
     }
 
     private static Program parseProgram(ArrayList<Token> tokens) {
