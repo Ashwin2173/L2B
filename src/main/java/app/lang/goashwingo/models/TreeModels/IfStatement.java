@@ -1,20 +1,19 @@
 package app.lang.goashwingo.models.TreeModels;
 
 import app.lang.goashwingo.core.StatementType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-public class WhileStatement extends Statement {
+public class IfStatement extends Statement {
     private int line;
     private ExpressionStatement expressionStatement;
-    private BlockStatement body;
+    private BlockStatement ifBlock;
+    private BlockStatement elseBlock;
 
-    public WhileStatement(int line) {
-        super.type = StatementType.WHILE;
+    public IfStatement(int line) {
+        super.type = StatementType.IF;
         this.line = line;
     }
 }

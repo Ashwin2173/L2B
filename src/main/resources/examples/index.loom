@@ -1,11 +1,42 @@
-fn main : args {
-    call 10;
-    var start_time = laret;
+fn main {
     var count = 0;
-    while(count < 1000000) {
+    now();
+    var start_time = resurrect;
+    while(count <= 1000000) {
         count = count + 1;
     };
+    now();
+    log(resurrect - start_time);
+    ret 0;
+}
+
+fn main1 {
+    now();
+    var start_time = resurrect;
+    var COUNT = 20;
+    var num = 0;
+    while(num <= COUNT) {
+        fib(num);
+        num = num + 1;
+    };
+    now();
+    log(resurrect - start_time);
+    ret 0;
+}
+
+fn fib : num {
+    if(num <= 1) {
+        ret num;
+    };
+    ret fib(num - 1) + fib(num - 2);
+}
+
+fn log : string {
+    call 1, string;
+    ret 0;
+}
+
+fn now {
     call 10;
-    call 1, laret - start_time;
-    call 1, "ms";
+    ret resurrect;
 }

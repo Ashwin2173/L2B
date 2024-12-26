@@ -48,6 +48,9 @@ public class Parser {
             } else if(token.getType() == TokenType.KW_CALL) {
                 this.checkGlobalScope("system call statement");
                 statements.add(this.parseCallStatement());
+            } else if(token.getType() == TokenType.KW_IF) {
+                this.checkGlobalScope("if statement");
+                statements.add(this.parseIfStatement());
             } else if(token.getType() == TokenType.CLOSE_BRACE) {
                 this.trace.pop();
                 return statements;
@@ -72,9 +75,34 @@ public class Parser {
         this.addImport(moduleNameToken);
     }
 
+    private IfStatement parseIfStatement() {
+        Token ifToken = this.peek();
+        this.trace.push(ifToken);
+        IfStatement ifStatement = new IfStatement(ifToken.getLine());
+        this.consumeToken(TokenType.KW_IF);
+
+        this.consumeToken(TokenType.OPEN_PARAM);
+        ExpressionStatement expressionStatement = this.parseExpression();
+        ifStatement.setExpressionStatement(expressionStatement);
+        this.consumeToken(TokenType.CLOSE_PARAM);
+
+        BlockStatement ifBlock = this.parseBlockStatement();
+        ifStatement.setIfBlock(ifBlock);
+
+        if(this.match(TokenType.KW_ELSE)) {
+            Token elseToken = this.peek();
+            this.consumeToken(TokenType.KW_ELSE);
+            this.trace.push(elseToken);
+            BlockStatement elseBlock = this.parseBlockStatement();
+            ifStatement.setElseBlock(elseBlock);
+        }
+
+        this.consumeToken(TokenType.SEMICOLON);
+        return ifStatement;
+    }
+
     private AssignmentStatement parseAssignmentStatement() {
         Token name = this.peek();
-        int line = name.getLine();
         this.consumeToken(TokenType.ID);
         this.consumeToken(TokenType.EQUAL);
         ExpressionStatement expressionStatement = new ExpressionStatement(this.equality());
@@ -265,6 +293,10 @@ public class Parser {
             this.nextToken();
             return new BooleanLiteral(false);
         }
+        if(token.getType() == TokenType.KW_RESURRECT) {
+            this.nextToken();
+            return new ResurrectLiteral();
+        }
         if(token.getType() == TokenType.ID) {
             Token nextToken = this.peek(1);
             if(nextToken != null) {
@@ -313,7 +345,12 @@ public class Parser {
         }
         TokenType currentTokenType = this.peek().getType();
         if(currentTokenType != expected) {
-            String errorMessage = String.format("expected '%s', but got '%s'", expected, currentTokenType);
+            String errorMessage;
+            if(expected == TokenType.SEMICOLON) {
+                errorMessage = "expected 'SEMICOLON'";
+            } else {
+                errorMessage = String.format("expected '%s', but got '%s'", expected, currentTokenType);
+            }
             throw new LoomSyntaxError(errorMessage);
         }
         this.nextToken();

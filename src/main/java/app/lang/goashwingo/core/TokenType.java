@@ -1,7 +1,5 @@
 package app.lang.goashwingo.core;
 
-import java.util.function.Predicate;
-
 public enum TokenType {
     OPEN_BRACE,
     CLOSE_BRACE,
@@ -35,6 +33,9 @@ public enum TokenType {
     KW_VAR,
     KW_CALL,
     KW_WHILE,
+    KW_IF,
+    KW_ELSE,
     KW_TRUE,
-    KW_FALSE
+    KW_FALSE,
+    KW_RESURRECT,
 }

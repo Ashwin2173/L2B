@@ -1,6 +1,7 @@
 package app.lang.goashwingo.core;
 
 public enum StatementType {
+    IF,
     CALL,
     WHILE,
     BLOCK,

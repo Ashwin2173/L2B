@@ -195,6 +195,9 @@ public class Lexer {
             put("true", TokenType.KW_TRUE);
             put("false", TokenType.KW_FALSE);
             put("while", TokenType.KW_WHILE);
+            put("if", TokenType.KW_IF);
+            put("else", TokenType.KW_ELSE);
+            put("resurrect", TokenType.KW_RESURRECT);
         }};
         return keywordsMap.getOrDefault(word, null);
     }

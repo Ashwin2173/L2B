@@ -2,9 +2,11 @@ package app.lang.goashwingo.core.interpreter;
 
 import app.lang.goashwingo.core.StatementType;
 import app.lang.goashwingo.exceptions.InternalError;
-import app.lang.goashwingo.models.TreeModels.FunctionDeclaration;
-import app.lang.goashwingo.models.TreeModels.Program;
-import app.lang.goashwingo.models.TreeModels.Statement;
+import app.lang.goashwingo.models.Execute;
+import app.lang.goashwingo.models.TreeModels.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Orchestrator {
     private final ExecutionService executionService;
@@ -12,14 +14,27 @@ public class Orchestrator {
 
     public Orchestrator(Program program) {
         this.initFunctionBuffer(program);
-        this.executionService = new ExecutionService(functionBuffer);
+        this.executionService = new ExecutionService(this);
     }
 
     public void start() {
+        callFunction("main", new ArrayList<>());
+        // System.out.printf("Main function exited with return value of %s\n", executionService.returnValue);
+    }
+
+    public void callFunction(String name, List<ExpressionStatement> arguments) {
+        FunctionDeclaration functionDeclaration = functionBuffer.get(name);
+        Execute newExecute = new Execute(functionDeclaration.getBody(), true);
+        VariablePool variablePool = executionService.initFunctionCall(name, functionDeclaration.getArgumentsName(), arguments, functionDeclaration.getName().getLine());
+        newExecute.setVariablePool(variablePool);
+        executionService.getExecutionStack().push(newExecute);
         while(executionService.canStepIn()) {
             executionService.stepIn();
+            if(executionService.isReturned()) {
+                executionService.resetReturn();
+                return ;
+            }
         }
-        // System.out.printf("Main function exited with return value of %s\n", executionService.returnValue);
     }
 
     private void initFunctionBuffer(Program program) {

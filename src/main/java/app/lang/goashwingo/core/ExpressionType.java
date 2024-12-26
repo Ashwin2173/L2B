@@ -5,7 +5,8 @@ public enum ExpressionType {
     UNARY,
     BINARY,
     INT_LITERAL,
-    STRING_LITERAL,
     FUNCTION_CALL,
-    BOOLEAN_LITERAL
+    STRING_LITERAL,
+    BOOLEAN_LITERAL,
+    RESURRECT_LITERAL,
 }

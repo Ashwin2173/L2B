@@ -8,6 +8,7 @@ import app.lang.goashwingo.models.Execute;
 import app.lang.goashwingo.models.Token;
 import app.lang.goashwingo.models.TreeModels.*;
 
+import java.util.List;
 import java.util.Stack;
 
 public class ExpressionService {
@@ -30,18 +31,29 @@ public class ExpressionService {
             return this.executeUnary((UnaryExpression) expression);
         } else if(expressionType == ExpressionType.ID) {
             return this.readVariable((Identifier) expression, context.getExecutionStack());
-        } else if (expressionType == ExpressionType.INT_LITERAL) {
+        } else if(expressionType == ExpressionType.INT_LITERAL) {
             IntLiteral intLiteral = (IntLiteral) expression;
             return intLiteral.getValue();
         } else if(expressionType == ExpressionType.BOOLEAN_LITERAL) {
             BooleanLiteral booleanLiteral = (BooleanLiteral) expression;
             return booleanLiteral.isValue();
-        } else if (expressionType == ExpressionType.STRING_LITERAL) {
+        } else if(expressionType == ExpressionType.RESURRECT_LITERAL) {
+            return this.context.returnValue;
+        } else if(expressionType == ExpressionType.STRING_LITERAL) {
             StringLiteral stringLiteral = (StringLiteral) expression;
             return stringLiteral.getValue();
+        } else if(expressionType == ExpressionType.FUNCTION_CALL) {
+            this.handleFunctionCall((CallExpression) expression);
+            return this.context.returnValue;
         } else {
             throw new InternalError(String.format("'%s' is not implemented in expressionExecutor", expressionType));
         }
+    }
+
+    private void handleFunctionCall(CallExpression callExpression) {
+        List<ExpressionStatement> expressionStatementList = callExpression.getArguments();
+        String calleeName = callExpression.getCalleeList().get(0).getName();        // todo: fix this shit
+        this.context.getOrchestratorContext().callFunction(calleeName, expressionStatementList);
     }
 
     private Object executeBinary(BinaryExpression expression) {
@@ -108,16 +120,17 @@ public class ExpressionService {
 
     private Object readVariable(Identifier identifier, Stack<Execute> executionStack) {
         String name = identifier.getName();
-        if(name.equals("laret")) {      // special variable which denotes last returned value
-            return context.returnValue;
-        }
         int stackSize = executionStack.size() - 1;
+        boolean shouldStop = false;
         for(int index = stackSize; index >= 0; index--) {
-            VariablePool variablePool = executionStack.get(index).getVariablePool();
+            Execute execute = executionStack.get(index);
+            if(execute.isFunction()) shouldStop = true;
+            VariablePool variablePool = execute.getVariablePool();
             Object value = variablePool.get(name);
             if(value != null) {
                 return value;
             }
+            if(shouldStop) break;
         }
         String errorMessage = String.format("Variable '%s' is not defined", name);
         throw new RunTimeError(errorMessage, identifier.getLine());
@@ -126,13 +139,17 @@ public class ExpressionService {
     public void writeVariable(Token token, Object newValue, Stack<Execute> executionStack) {
         String name = token.getRaw();
         int stackSize = executionStack.size() - 1;
+        boolean shouldStop = false;
         for(int index = stackSize; index >= 0; index--) {
-            VariablePool variablePool = executionStack.get(index).getVariablePool();
+            Execute execute = executionStack.get(index);
+            if(execute.isFunction()) shouldStop = true;
+            VariablePool variablePool = execute.getVariablePool();
             Object value = variablePool.get(name);
             if(value != null) {
                 variablePool.set(token, newValue);
                 return;
             }
+            if(shouldStop) break;
         }
         String errorMessage = String.format("Variable '%s' is not defined", name);
         throw new RunTimeError(errorMessage, token.getLine());
